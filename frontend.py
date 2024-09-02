@@ -29,5 +29,3 @@ def gradio_frontend():
             pass
 
     yield frontend
-
-
