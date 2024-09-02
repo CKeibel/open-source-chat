@@ -1,14 +1,17 @@
 from contextlib import contextmanager
 import gradio as gr
 from llm import LLM
+from chat_buffer import chat_history
 from typing import Tuple
+from schemas import Message
 
 
 def response(message, history) -> Tuple[str, list]:
+    chat_history.append(Message(role="user", content=message))
     model = LLM("meta-llama/Meta-Llama-3.1-8B-Instruct")
-    res = model.generate(message)
-    history.append((message, "response"))
-    return "", history
+    res = model.generate(chat_history.to_model_input())
+    chat_history.append(Message(role="assistant", content=res))
+    return "", chat_history.to_list()
 
 
 @contextmanager
