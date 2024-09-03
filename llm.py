@@ -30,7 +30,7 @@ class LLM:
         self.tokenizer.chat_template = chat_template
         self.model = AutoModelForCausalLM.from_pretrained(
             model_id,
-            torch_dtype=torch.bfloat16,
+            torch_dtype=torch.float16,
             device_map="auto",
             token=access_token,
             trust_remote_code=True,
@@ -39,13 +39,13 @@ class LLM:
         self.gen_cfg.max_new_tokens = 250
         self.gen_cfg.num_beams = 3
         self.gen_cfg.temperature = 1.4
-        self.gen_cfg.top_k = 0.85
+        self.gen_cfg.top_k = 85
         self.gen_cfg.pad_token_id = self.tokenizer.pad_token_id
         self.gen_cfg.begin_suppress_tokensrepetition_penalty = 5
         self.gen_cfg.no_repeat_ngram_size = 3
 
     @torch.no_grad()
-    def generate(self, input: str, **kwargs) -> str:
+    def generate(self, inputs: str, **kwargs) -> str:
         """Function to generate the answer for the given input text.
         Args:
             input (str): The input text for which the answer needs to be generated.
@@ -53,7 +53,7 @@ class LLM:
             str: The generated answer.
         """
         messages = self.tokenizer.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=True
+            inputs, tokenize=False, add_generation_prompt=True
         )
         inputs_ids = self.tokenizer(messages, return_tensors="pt").input_ids.to(
             self.model.device
